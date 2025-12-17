@@ -5,7 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "ag-ui-adk==0.3.1",
+    "ag-ui-adk>=0.3.6",
     "google-adk>=1.19.0",
     "google-genai>=1.52.0",
     "googlemaps>=4.10.0",

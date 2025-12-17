@@ -58,6 +58,7 @@ export default function HomePage() {
             }
             if (status === "complete" && result) {
                 const {result: coords} = result;
+                console.log("Place Location Result:", coords);
                 return <GoogleMap lat={coords?.latitude} lng={coords?.longitude}/>;
             }
             return null;

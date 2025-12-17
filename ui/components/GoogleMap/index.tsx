@@ -13,6 +13,8 @@ export default function GoogleMap({
   lng,
   zoom = 12
 }: GoogleMapThumbnailProps) {
+
+
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
       <div

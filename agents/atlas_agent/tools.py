@@ -137,11 +137,13 @@ def get_place_location(place_name: str) -> dict[str, str]:
         location = geocode_result[0]["geometry"]["location"]
         lat = location["lat"]
         lng = location["lng"]
+        print(f"Geocoded '{place_name}' to (lat: {lat}, lng: {lng})")
         return {
             "status": "success",
             "result": {"latitude": lat, "longitude": lng}
         }
     except Exception as e:
+        print(f"Error geocoding address '{place_name}': {e}")
         return {
             "status": "error",
             "message": str(e)
