@@ -128,8 +128,8 @@ export default function HomePage() {
                 title: "Change background to blue-green gradient",
                 message: "Change the background to a right-to-left gradient from blue to green."
             },{
-                title: "Change background to pink",
-                message: "Change the background to pink."
+                title: "Change background to red",
+                message: "Change the background to red."
             }]}
         />
     </main>
