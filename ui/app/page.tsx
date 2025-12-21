@@ -5,6 +5,7 @@ import {useState} from "react";
 import {useFrontendTool, useRenderToolCall} from "@copilotkit/react-core";
 import GoogleMap from "@/components/GoogleMap";
 import WeatherCard, {getThemeColor, WeatherToolResult} from "@/components/WeatherCard";
+import AgentDebugger from "@/components/AgentDebugger";
 
 
 export default function HomePage() {
@@ -112,26 +113,31 @@ export default function HomePage() {
     });
 
   return (
-    <main className="h-screen w-screen" style={{background}} >
-        <CopilotChat
-            className="h-full rounded-2xl max-w-6xl mx-auto"
-            labels={{initial: "Hi, I'm an agent. Want to chat?"}}
-            suggestions={[{
-                title: "Weather in New York",
-                message: "What's the weather like in New York?"
-            },
-            {
-                title: "Where is the Eiffel Tower?",
-                message: "Get me the location of the Eiffel Tower."
-            },
-            {
-                title: "Change background to blue-green gradient",
-                message: "Change the background to a right-to-left gradient from blue to green."
-            },{
-                title: "Change background to red",
-                message: "Change the background to red."
-            }]}
-        />
+    <main className="h-screen w-screen flex flex-row gap-4 p-4" style={{background}} >
+        <div className="flex-1 h-full">
+            <CopilotChat
+                className="h-full rounded-2xl"
+                labels={{initial: "Hi, I'm an agent. Want to chat?"}}
+                suggestions={[{
+                    title: "Weather in New York",
+                    message: "What's the weather like in New York?"
+                },
+                {
+                    title: "Where is the Eiffel Tower?",
+                    message: "Get me the location of the Eiffel Tower."
+                },
+                {
+                    title: "Change background to blue-green gradient",
+                    message: "Change the background to a right-to-left gradient from blue to green."
+                },{
+                    title: "Change background to red",
+                    message: "Change the background to red."
+                }]}
+            />
+        </div>
+        <div className="flex-1 h-full overflow-hidden">
+            <AgentDebugger/>
+        </div>
     </main>
   );
 }
