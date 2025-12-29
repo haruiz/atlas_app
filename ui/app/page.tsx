@@ -136,7 +136,7 @@ export default function HomePage() {
             />
         </div>
         <div className="flex-1 h-full overflow-hidden">
-            <AgentDebugger/>
+            <AgentDebugger className="h-full"/>
         </div>
     </main>
   );
