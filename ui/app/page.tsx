@@ -1,136 +1,116 @@
 "use client";
 
+import React, {useEffect} from "react";
+import "@copilotkit/react-ui/styles.css";
+// import "./style.css";
+
+// CopilotKit core
+import {useCopilotAction, useCopilotChat,} from "@copilotkit/react-core";
 import {CopilotChat} from "@copilotkit/react-ui";
-import {useState} from "react";
-import {useFrontendTool, useRenderToolCall} from "@copilotkit/react-core";
-import GoogleMap from "@/components/GoogleMap";
-import WeatherCard, {getThemeColor, WeatherToolResult} from "@/components/WeatherCard";
+import {MessageToA2A} from "@/components/a2a/MessageToA2A";
+import {MessageFromA2A} from "@/components/a2a/MessageFromA2A";
 
 
-export default function HomePage() {
-    const [background, setBackground] = useState<string>(
-        "--copilot-kit-background-color"
-    );
 
-    /* --------------------------------------------------------------------------------------------
-     * CHANGE BACKGROUND TOOL
-     * This tool allows the LLM to set the chat background.
-     * ------------------------------------------------------------------------------------------*/
-    useFrontendTool({
-        name: "change_background",
-        description:
-            "Change the chat's background using any CSS background value (color, gradient, etc.).",
-        parameters: [
-            {
-                name: "background",
-                type: "string",
-                description: "CSS background definition (colors, gradients, etc).",
-            },
-        ],
-        // The tool handler executes when the LLM calls this tool.
-        handler: ({background}) => {
-            setBackground(background);
-            return {
-                status: "success",
-                message: `Background changed to ${background}`,
-            };
-        },
-    });
+const Chat = () => {
+    const {visibleMessages} = useCopilotChat();
 
-    /* --------------------------------------------------------------------------------------------
-    * RENDER PLACE LOCATION TOOL CALL
-    * This visually renders the result of the get_place_location tool.
-    * ------------------------------------------------------------------------------------------
-    */
+    useCopilotAction({
+    name: "send_message_to_a2a_agent",
+    description: "Sends a message to an A2A agent",
+    available: "frontend",
+    parameters: [
+      {
+        name: "agentName",
+        type: "string",
+        description: "The name of the A2A agent to send the message to",
+      },
+      {
+        name: "task",
+        type: "string",
+        description: "The message to send to the A2A agent",
+      },
+    ],
+    render: (actionRenderProps) => {
+        console.log(actionRenderProps);
+      return (
+        <>
+          <MessageToA2A {...actionRenderProps} />
+          <MessageFromA2A {...actionRenderProps} />
+        </>
+      );
+    },
+  });
 
-    useRenderToolCall({
-        name: "get_place_location",
-        description: "get the latitude and longitude of a place given its name.",
-        available: "disabled",
-        parameters: [{name: "place_name", type: "string", required: true}],
-        render: ({args, status, result}) => {
-            if (status === "inProgress") {
-                return (
-                    <div className="bg-[#667eea] text-white p-4 rounded-lg max-w-md">
-                        <span className="animate-spin">⚙️ Retrieving location...</span>
-                    </div>
-                );
+    useEffect(() => {
+      const extractDataFromMessages = () => {
+      for (const message of visibleMessages) {
+        const msg = message;
+
+        if (msg.type === "ResultMessage" && msg.actionName === "send_message_to_a2a_agent") {
+
+          try {
+            let parsed;
+            const result = msg.result;
+            if (typeof result === "string") {
+              try {
+                  parsed = JSON.parse(result);
+              }
+            catch {
+                continue;
             }
-            if (status === "complete" && result) {
-                const {result: coords} = result;
-                return <GoogleMap lat={coords?.latitude} lng={coords?.longitude}/>;
+            } else if (typeof result === "object") {
+                parsed = result;
             }
-            return null;
+            console.log("Sending message to A2A agent: ", parsed);
+          } catch (e) {
+            console.error("Failed to extract data from message:", e);
+          }
         }
-    })
+      }
+    };
+
+    extractDataFromMessages();
+    }, [visibleMessages]);
 
     /* --------------------------------------------------------------------------------------------
-     * RENDER WEATHER TOOL CALL
-     * This visually renders the result of the get_weather tool.
+     * MAIN UI RENDERING
      * ------------------------------------------------------------------------------------------*/
-    useRenderToolCall({
-        name: "get_weather",
-        description: "Get the current weather for a specified location.",
-        available: "disabled", // Using MCP or manually invoking elsewhere
-        parameters: [{name: "location", type: "string", required: true}],
-        render: ({args, status, result : toolResponse}) => {
-            /* STATUS: inProgress --------------------------------------------------*/
-            if (status === "inProgress") {
-                return (
-                    <div className="bg-[#667eea] text-white p-4 rounded-lg max-w-md">
-                        <span className="animate-spin">⚙️ Retrieving weather...</span>
-                    </div>
-                );
-            }
+    return (
+        <div
+            className="flex justify-center items-center h-full w-full"
+            data-testid="background-container"
+        >
+            <div className="h-full w-full md:w-8/10 md:h-8/10 rounded-lg">
+                <CopilotChat
+                    onSubmitMessage={(message) => {
+                        console.log("User submitted message:", message);
+                    }}
+                    suggestions={[{
+                        title: "What is the weather in San Francisco?",
+                        message: "What is the weather in San Francisco?"
+                    }]}
+                    className="h-full rounded-2xl max-w-6xl mx-auto"
+                    labels={{initial: "Hi, I'm an agent. Want to chat?"}}
+                />
+            </div>
+            <span className="absolute bottom-4 right-4 text-xs text-gray-400">
+                Num Messages: {visibleMessages.length}
+            </span>
+        </div>
+    );
+};
 
-            /* STATUS: complete ----------------------------------------------------*/
-            if (status === "complete" && toolResponse) {
-                const weatherResult: WeatherToolResult | null = toolResponse?.result || null;
-                console.log("Weather Result:", weatherResult);
-                if (!weatherResult) {
-                    return (
-                        <div className="bg-red-300 text-red-900 p-4 rounded-lg max-w-md">
-                            <strong>⚠️ Error:</strong> Unable to retrieve weather data. Please try again.
-                        </div>
-                    );
-                }
-                // Choose color based on weather conditions
-                const themeColor = getThemeColor(weatherResult.conditions);
-                return (
-                    <WeatherCard
-                        location={args.location}
-                        themeColor={themeColor}
-                        result={weatherResult}
-                        status={status || "complete"}
-                    />
-                );
-            }
+/* ------------------------------------------------------------------------------------------------
+ * HOME PAGE WRAPPER
+ * ----------------------------------------------------------------------------------------------*/
 
-            return null;
-        },
-    });
+const HomePage = () => {
+    return (
+        <main className="h-screen w-screen">
+            <Chat/>
+        </main>
+    );
+};
 
-  return (
-    <main className="h-screen w-screen" style={{background}} >
-        <CopilotChat
-            className="h-full rounded-2xl max-w-6xl mx-auto"
-            labels={{initial: "Hi, I'm an agent. Want to chat?"}}
-            suggestions={[{
-                title: "Weather in New York",
-                message: "What's the weather like in New York?"
-            },
-            {
-                title: "Where is the Eiffel Tower?",
-                message: "Get me the location of the Eiffel Tower."
-            },
-            {
-                title: "Change background to blue-green gradient",
-                message: "Change the background to a right-to-left gradient from blue to green."
-            },{
-                title: "Change background to pink",
-                message: "Change the background to pink."
-            }]}
-        />
-    </main>
-  );
-}
+export default HomePage;

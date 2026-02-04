@@ -4,6 +4,7 @@ __pycache__/
 build/
 dist/
 wheels/
+a2a-inspector/
 *.egg-info
 
 # Virtual environments
