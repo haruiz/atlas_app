@@ -1,0 +1,21 @@
+    //
+    // useFrontendTool({
+    //     name: "change_background",
+    //     description:
+    //         "Change the chat's background using any CSS background value (color, gradient, etc.).",
+    //     parameters: [
+    //         {
+    //             name: "background",
+    //             type: "string",
+    //             description: "CSS background definition (colors, gradients, etc).",
+    //         },
+    //     ],
+    //     // The tool handler executes when the LLM calls this tool.
+    //     handler: ({background}) => {
+    //         setBackground(background);
+    //         return {
+    //             status: "success",
+    //             message: `Background changed to ${background}`,
+    //         };
+    //     },
+    // });

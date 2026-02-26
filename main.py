@@ -1,6 +1,5 @@
 from ag_ui_adk import ADKAgent, add_adk_fastapi_endpoint
 from fastapi import FastAPI
-
 from agents.atlas_agent.agent import root_agent as atlas_root_agent
 
 
@@ -11,8 +10,9 @@ from agents.atlas_agent.agent import root_agent as atlas_root_agent
 # -------------------------------------------------------------------
 ag_atlas_agent = ADKAgent(
     adk_agent=atlas_root_agent,            # The core ADK agent
-    app_name="atlas_app",                # App identifier
-    user_id="demo_user",                # Mock user ID (replace in production)
+    app_name="atlas_app",
+    # App identifier
+    #user_id="demo_user",                # Mock user ID (replace in production)
     session_timeout_seconds=3600,       # Session expiration
     use_in_memory_services=True         # Enables in-memory RAG + storage
 )

@@ -1,13 +1,17 @@
 from typing import Optional, Dict, Any
 
+from dotenv import load_dotenv, find_dotenv
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.agents.llm_agent import Agent
 from google.adk.models import LlmResponse, LlmRequest
 from google.adk.tools import BaseTool, ToolContext
 from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 
-
+from .plugins.model_armor_guard import create_model_armor_guard
 from .tools import get_weather, get_place_location, get_place_details
+
+load_dotenv(find_dotenv())  # Load environment variables from .env file
+
 
 agent_instructions = """
 You are a helpful assistant designed to answer user questions and provide useful information, 
@@ -62,12 +66,16 @@ def before_tool(
     return None
 
 
+model_armor_guard = create_model_armor_guard()
+
 root_agent = Agent(
     name="assistant",                    # Internal agent name
-    model="gemini-2.5-flash",            # LLM model to use
+    model="gemini-3-pro-preview",            # LLM model to use
     instruction=agent_instructions,
-    before_model_callback=before_model,
-    before_tool_callback=before_tool,
+    # before_model_callback=before_model,
+    # before_tool_callback=before_tool,
+    before_model_callback=model_armor_guard.before_model_callback,
+    after_model_callback=model_armor_guard.after_model_callback,
     tools=[
         # Provides persistent memory during the session (non-long-term)
         PreloadMemoryTool(),
@@ -79,3 +87,5 @@ root_agent = Agent(
 
     ]
 )
+
+
