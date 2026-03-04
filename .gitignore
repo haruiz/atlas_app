@@ -11,6 +11,7 @@ a2a-inspector/
 .venv
 ### Node template
 # Logs
+ui2
 logs
 *.log
 npm-debug.log*

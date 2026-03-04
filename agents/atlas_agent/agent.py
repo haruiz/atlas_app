@@ -8,6 +8,9 @@ from google.adk.models import LlmRequest, LlmResponse
 from google.adk.tools import BaseTool, ToolContext, AgentTool
 from google.adk.tools.preload_memory_tool import PreloadMemoryTool
 from dotenv import load_dotenv, find_dotenv
+# from agents.weather_agent.agent import root_agent as weather_agent
+# from agents.maps_agent.agent import root_agent as maps_agent
+
 
 # Load environment variables
 load_dotenv(find_dotenv())
@@ -65,22 +68,33 @@ def before_tool(
 # ======================================================================
 # REMOTE AGENTS (enable when servers are available to test a2a locally)
 # ======================================================================
-# maps_agent = RemoteA2aAgent(
-#     name="maps_agent",
-#     description="Provides geocoding, place lookup, and mapping utilities.",
-#     agent_card=f"http://127.0.0.1:8001{AGENT_CARD_WELL_KNOWN_PATH}",
-# )
-#
-# weather_agent = RemoteA2aAgent(
-#     name="weather_agent",
-#     description="Retrieves real-time weather conditions for a given coordinate.",
-#     agent_card=f"http://127.0.0.1:8002{AGENT_CARD_WELL_KNOWN_PATH}",
-# )
+maps_agent = RemoteA2aAgent(
+    name="maps_agent",
+    description="Provides geocoding, place lookup, and mapping utilities.",
+    agent_card=f"http://127.0.0.1:8001{AGENT_CARD_WELL_KNOWN_PATH}",
+)
+
+weather_agent = RemoteA2aAgent(
+    name="weather_agent",
+    description="Retrieves real-time weather conditions for a given coordinate.",
+    agent_card=f"http://127.0.0.1:8002{AGENT_CARD_WELL_KNOWN_PATH}",
+)
+
+travel_tips_agent = RemoteA2aAgent(
+    name="TravelInsightsAgent",
+    description="Provides travel insights and recommendations based on location and weather information.",
+    agent_card=f"http://127.0.0.1:8003{AGENT_CARD_WELL_KNOWN_PATH}",
+)
 
 
 # ======================================================================
 # ORCHESTRATOR AGENT
 # ======================================================================
+
+
+# masp_agent_tool = AgentTool(maps_agent)
+# weather_agent_tool = AgentTool(weather_agent)
+#
 
 root_agent = Agent(
     name="OrchestratorAgent",
@@ -89,13 +103,14 @@ root_agent = Agent(
     # Uncomment for debugging
     # before_tool_callback=before_tool,
     # before_model_callback=before_model,
-
+    #sub_agents=[maps_agent, weather_agent],
     tools=[
         PreloadMemoryTool(),
 
         # When remote agents are active:
         # AgentTool(agent=maps_agent),
         # AgentTool(agent=weather_agent),
+        # AgentTool(agent=travel_tips_agent)
     ],
 
     instruction="""
@@ -103,6 +118,7 @@ root_agent = Agent(
     
     - maps_agent: Resolves place names, coordinates, and map-related queries.
     - weather_agent: Retrieves weather information using geographic coordinates.
+    - TravelInsightsAgent: Provides travel insights based on location and weather information.
     
     Your responsibility is to determine when each agent should be called, how their outputs should be used, and how to produce a final integrated response for the user.
     
@@ -130,6 +146,13 @@ root_agent = Agent(
     
     1. Call maps_agent directly.  
     2. Return the result to the user.
+    
+    If the user ask for travel recommendations or insights that require both location and weather:
+    
+    1. Call maps_agent to get coordinates.
+    2. Call weather_agent with those coordinates to get weather info.
+    3. Call TravelInsightsAgent with both location and weather info to get travel insights. Make sure to pass the information in a way that TravelInsightsAgent can understand (e.g. "Location: Kyoto, Japan (lat 35.0116, lon 135.7681)\nWeather: Mild days, cool evenings, occasional rain.").
+    4. Return the travel insights to the user.
     
     ----------------------------------------------------------------------
     Execution Rules

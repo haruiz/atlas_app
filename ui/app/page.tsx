@@ -89,6 +89,9 @@ const Chat = () => {
                     suggestions={[{
                         title: "What is the weather in San Francisco?",
                         message: "What is the weather in San Francisco?"
+                    }, {
+                        title: "PLan 4 day trip to yosemite national park",
+                        message: "Plan 4 day trip to yosemite national park"
                     }]}
                     className="h-full rounded-2xl max-w-6xl mx-auto"
                     labels={{initial: "Hi, I'm an agent. Want to chat?"}}

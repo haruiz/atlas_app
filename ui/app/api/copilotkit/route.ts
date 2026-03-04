@@ -10,6 +10,7 @@ export async function POST(request: NextRequest) {
 const weatherAgentUrl = process.env.WEATHER_AGENT_URL || "http://localhost:8002";
 const mapsAgentUrl = process.env.MAPS_AGENT_URL || "http://localhost:8001";
 const orchestratorUrl = process.env.ORCHESTRATOR_URL || "http://localhost:8000";
+const travelInsightsAgentUrl = process.env.TRAVEL_INSIGHTS_AGENT_URL || "http://localhost:8003";
 
 // the orchestrator agent we pass to the middleware needs to be an instance of a derivative of an ag-ui `AbstractAgent`
 // In this case, we have access to the agent via url, so we can gain an instance using the `HttpAgent` class
@@ -26,6 +27,7 @@ const a2aMiddlewareAgent = new A2AMiddlewareAgent({
   agentUrls: [
     weatherAgentUrl,
     mapsAgentUrl,
+    travelInsightsAgentUrl
   ],
   // Pass the agent instance
   orchestrationAgent
